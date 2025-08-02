@@ -15,8 +15,8 @@ for round = 1, rounds do
     monitor.write("Round: " .. round)
 
     -- Generate random position    
-    local targetX = math.random(1, w)
-    local targetY = math.random(1, h)
+    local targetX = math.random(9, w)
+    local targetY = math.random(3, h)
 
     -- Show target
     monitor.setCursorPos(targetX, targetY)
@@ -36,7 +36,7 @@ for round = 1, rounds do
         -- If miss, just wait
     end
     -- Reaction time end time timestamp
-    local endtime = os.clock()
+    local endTime = os.clock()
     local reactionTime = endTime - startTime
     table.insert(reactionTimes, reactionTime)
 end
