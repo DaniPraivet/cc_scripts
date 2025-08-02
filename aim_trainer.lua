@@ -1,4 +1,4 @@
-monitor.pheripheral.wrap("right")
+monitor = peripheral.wrap("right")
 monitor.setTextScale(1)
 w, h = monitor.getSize()
 math.randomseed(os.time())
