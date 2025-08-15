@@ -74,21 +74,85 @@ end
 -- Defense fase
 local function startDefense()
     projectiles = {}
-    for i = 1, 5 do
-        table.insert(projectiles, {
-            x = boxX+math.random(1, boxW-1),
-            y = boxY+1,
-            dy = 0.2
-        })
-    end
+
+    -- Patterns
+    local patterns = {
+        -- Vertical rain
+        function()
+            for i = 1, 6 do
+                table.insert(projectiles, {
+                    x = boxX + math.random(1, boxW - 1),
+                    y = boxY + 1,
+                    dy = 0.2
+                })
+            end
+        end,
+        -- Horizontal bursts from left
+        function()
+            for i = 1, 6 do
+                table.insert(projectiles, {
+                    x = boxX + 1,
+                    y = boxY + math.random(1, boxH - 1),
+                    dx = 0.2
+                })
+            end
+        end,
+        -- Horizontal bursts from right
+        function()
+            for i = 1, 6 do
+                table.insert(projectiles, {
+                    x = boxX + boxW - 1,
+                    y = boxY + math.random(1, boxH - 1),
+                    dx = -0.2
+                })
+            end
+        end,
+        -- Crossed diagonals
+        function()
+            for i = 1, 4 do
+                table.insert(projectiles, {
+                    x = boxX + 1,
+                    y = boxY + 1,
+                    dx = 0.2,
+                    dy = 0.2
+                })
+                table.insert(projectiles, {
+                    x = boxX + boxW - 1,
+                    y = boxY + 1,
+                    dx = -0.2,
+                    dy = 0.2
+                })
+            end
+        end
+    }
 
     local startTime = os.clock()
+    local lastWave = 0
+
     while os.clock() - startTime < 5 do
+        local elapsed = os.clock() - startTime
+
+        -- Each 1 second, one random pattern
+        if elapsed - lastWave >= 1 then
+            lastWave = elapsed
+            patterns[math.random(#patterns)]()
+        end
+
+        -- Move projectiles
         for _, p in ipairs(projectiles) do
-            p.y = p.y + p.dy
+            p.x = p.x + (p.dx or 0)
+            p.y = p.y + (p.dy or 0)
             if math.floor(p.x) == math.floor(heartX)
             and math.floor(p.y) == math.floor(heartY) then
                 playerHP = playerHP - 1
+            end
+        end
+
+        -- Remove projectiles out of the box
+        for i = #projectiles, 1, -1 do
+            if projectiles[i].x < boxX + 1 or projectiles[i].x > boxX + boxW - 1 or
+               projectiles[i].y < boxY + 1 or projectiles[i].y > boxY + boxH - 1 then
+                table.remove(projectiles, i)
             end
         end
 
@@ -98,10 +162,10 @@ local function startDefense()
         -- Heart movement
         local e = {os.pullEventRaw()}
         if e[1] == "key" then
-            if e[2] == keys.w and heartY > boxY+1 then heartY = heartY - 1 end
-            if e[2] == keys.s and heartY < boxY+boxH-1 then heartY = heartY + 1 end
-            if e[2] == keys.a and heartX > boxX+1 then heartX = heartX - 1 end
-            if e[2] == keys.d and heartX < boxX+boxW-1 then heartX = heartX + 1 end
+            if e[2] == keys.w and heartY > boxY + 1 then heartY = heartY - 1 end
+            if e[2] == keys.s and heartY < boxY + boxH - 1 then heartY = heartY + 1 end
+            if e[2] == keys.a and heartX > boxX + 1 then heartX = heartX - 1 end
+            if e[2] == keys.d and heartX < boxX + boxW - 1 then heartX = heartX + 1 end
         elseif e[1] == "terminate" then
             return
         end
